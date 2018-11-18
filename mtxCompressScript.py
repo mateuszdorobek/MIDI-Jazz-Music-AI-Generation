@@ -1,12 +1,28 @@
 import sys
 import numpy as np
 import png
+import math
 
+quantization = 30
 # This script will compress big data file with merged midi files into pictures and split it into 128x128 batches
+def loadLine(lines):
+    currentTick = int(int(lines[i].split()[0]))  # 0,1,2,3 etc.
+    type = 0 if lines[i].split()[1].startswith("Par") else 1  # Par 0,    On 1
+    value = int((lines[i].split()[3])[2:])  # c=64 64,  n=25 25   ...
+    volume = False if int(lines[i].split()[4][2:]) == 0 else True  # v=0 0,    v=127 1
+    return currentTick,type,value,volume
+
+def tickNormalize(tick):
+    return int(tick/quantization)
+
+def tickNormToPixel(tick):
+    return (int(tick/3),tick%3)
+def lenInTicks(lines):
+   return int(int(lines[len(lines)-3].split()[0]))
 
 fileName = "files/mtxMerged/data.mtx"
 print("Mtx Files Compressing: ")
-lineCounter = 1
+lineCounter = 3
 
 file = open(fileName, "r")
 lines = file.readlines()
@@ -14,61 +30,71 @@ lines = file.readlines()
 cut_file = []
 savedFiles = 0
 
-quantization = 30
 length = 128
-width = 128
+width = tickNormToPixel(tickNormalize(lenInTicks(lines)))[0]+100
 
-isSustained = 0
-activeNotes = [0] * width
-holdNotes = [0] *width
+isSustained = False
 
-img = np.zeros((length,width,3), np.uint8)
+activeNotes = [False] * length
+holdNotes = [False] * width
+img = np.zeros((length, width, 3), np.uint8)
 
-for i in range(len(lines)):
+prevTick = 0
+for i in range(2, len(lines) - 1):
+    if not lines[i].split()[1].startswith("Par"):
+        prevTick = tickNormalize(int(lines[i].split()[0]))
+        break
+currentTick = 0
+for i in range(2, len(lines) - 1):
 
     progress = 100 * lineCounter / len(lines)
     sys.stdout.write("\r" + str(round(progress, 1)) + '%')
-    activeNotes = [0] * 128
-    if lines[i].startswith(("MTrk","MFile","TrkEnd")):
+    if lines[i].startswith(("MTrk", "MFile", "TrkEnd")) or len(lines[i].split()) < 4:
         lineCounter += 1
         continue
+    tempTick = currentTick
+    (currentTick, type, value, volume) = loadLine(lines)
 
-    elif len(lines[i].split()) >= 4:
-        tick = int(int(lines[i].split()[0])/quantization)               # 0,1,2,3 etc.
-        type = 0 if lines[i].split()[1].startswith("Par") else  1       # Par 0,    On 1
-        value = int((lines[i].split()[3])[2:])                          # c=64 64,  n=25 25   ...
-        volume = 0 if int(lines[i].split()[4][2:])==0 else 1            # v=0 0,    v=127 1
+    currentTick = tickNormalize(currentTick)
+    # Adding note to active notes - played at this moment
+    if type == 1:  # On
+        activeNotes[value] = volume
+        prevTick = tempTick
 
-        # adding note to active notes - played at this moment
-        if type == 1: # On
-            activeNotes[value] = volume
-        if type == 0: # Par
-            isSustained = volume
-        # if sustain pedal is pressed, I add activeNotes to holdNotes
-        if isSustained:
-            for j in range(len(activeNotes)):
-                if activeNotes[j]:
-                    holdNotes[j]=1
+    if type == 0:  # Par
+        isSustained = volume
+    # If sustain pedal is pressed, I add activeNotes to holdNotes
+    if isSustained:
+        for j in range(len(activeNotes)):
+            if activeNotes[j]:
+                holdNotes[j] = True
+    else:
+        holdNotes = [False] * 128
+
+    # setting values of midi notes to pixels. Coded on BGR values of pixels.
+    # So first line will be on Blue value of first pixel, second on Green value of first and so on.
+
+    prevColumn = img[:, tickNormToPixel(prevTick)[0], tickNormToPixel(prevTick)[1]]
+    for tick in range(prevTick, currentTick):
+        img[:, tickNormToPixel(tick)[0], tickNormToPixel(tick)[1]] = prevColumn
+    for noteIndex in range(length):
+        if activeNotes[noteIndex]:
+            img.itemset(length - noteIndex - 1, tickNormToPixel(currentTick)[0],tickNormToPixel(currentTick)[1], 255)
         else:
-            holdNotes = [0] * 128
-        # setting values of midi notes to pixels. Coded on BGR values of pixels.
-        # So first line will be on Blue value of first pixel, second on Green value of first and so on.
-        if tick >= (savedFiles+1)*length*3:
-            # save image
-            pngFile = open("files/images/img"+str(savedFiles)+".png", "wb")
-            pngWriter = png.Writer(128,128)
-            pngWriter.write(pngFile,np.reshape(img, (-1, 128 * 3)))
-            pngFile.close()
-            img = np.zeros((length, width, 3), np.uint8)
-            savedFiles += 1
-        for j in range(width):
-            if isSustained:
-                img.itemset(int(tick%(length*3)/3), j, tick%3, holdNotes[j]*255)
-            else:
-                img.itemset(int(tick%(length*3)/3), j, tick%3, activeNotes[j]*255)
-        lineCounter += 1
+            img.itemset(length - noteIndex - 1, tickNormToPixel(currentTick)[0],tickNormToPixel(currentTick)[1], 0)
+        if isSustained and holdNotes[noteIndex]:
+            img.itemset(length - noteIndex - 1, tickNormToPixel(currentTick)[0], tickNormToPixel(currentTick)[1], 255)
+
+    lineCounter += 1
+
 # saving last file, that might be uncompleted
-pngFile = open("files/images/img"+str(savedFiles)+".png", "wb")
-pngWriter = png.Writer(128,128)
-pngWriter.write(pngFile,np.reshape(img, (-1, 128 * 3)))
-pngFile.close()
+for index in range(math.ceil(width/128)):
+    progress = 100 * index / math.ceil(width/128)
+    sys.stdout.write("\r" + str(round(progress, 1)) + '%')
+    part = img[:,index*128:(index+1)*128,:]
+    if part.shape[1]<128:
+        break
+    pngFile = open("files/images/img" + str(index) + ".png", "wb")
+    pngWriter = png.Writer(128,128)
+    pngWriter.write(pngFile, np.reshape(part, (-1, 128 * 3)))
+    pngFile.close()
