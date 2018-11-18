@@ -29,7 +29,11 @@ for fn in fileNames:
     lineTickNormalized = 0
     firstEvent: bool = True
     for i in range(len(lines)):
-        if lines[i].startswith(("MTrk","MFile","TrkEnd")):
+        if lines[i].startswith(("MTrk","MFile")):
+            cut_file.append(lines[i])
+        elif lines[i].startswith("TrkEnd"):
+            tick = int(lines[i-1].split()[0])
+            cut_file.append(str(tick+1)+" Par ch=1 c=64 v=0\n")
             cut_file.append(lines[i])
         elif len(lines[i].split()) >= 4:
             # calculate offset
@@ -48,6 +52,7 @@ for fn in fileNames:
                 lineVol = "v=127"
             # save line
             cut_file.append(str(lineTick )+ ' ' + ' '.join(lines[i].split()[1:len(lines[i].split())-1]) + ' ' + lineVol + '\n')
+
     name = os.path.join("files/mtxQuantized", os.path.basename(fn))
     try:
         to_save = open(name, "w")
