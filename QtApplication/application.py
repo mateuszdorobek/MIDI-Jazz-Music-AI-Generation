@@ -6,7 +6,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
 
-class Pause(object):
+class Mute(object):
 
     def __init__(self):
         freq = 44100  # audio CD quality
@@ -15,17 +15,18 @@ class Pause(object):
         buffer = 1024  # number of samples
         pygame.mixer.init(freq, bitsize, channels, buffer)
         pygame.mixer.music.set_volume(1.0)
-        self.paused = pygame.mixer.music.get_busy()
+        self.muted = pygame.mixer.music.get_busy()
 
     def toggle(self):
-        if self.paused:
+        if self.muted:
             pygame.mixer.music.set_volume(1.0)
             # pygame.mixer.music.unpause()
-        if not self.paused:
+        if not self.muted:
             print("pause test")
             pygame.mixer.music.set_volume(0)
             # pygame.mixer.music.pause()
-        self.paused = not self.paused
+        self.muted = not self.muted
+        return self.muted
 
 class Worker(QRunnable):
 
@@ -38,7 +39,6 @@ class Worker(QRunnable):
         self.play_music(midiFilePath)
 
     def play_music(self, music_file):
-        print("play")
         try:
             pygame.mixer.music.load(os.path.abspath("..\\files\midi\A Remark You Made.mid"))
         except pygame.error:
@@ -70,28 +70,35 @@ class Player(QWidget):
     def playMidiFile(self):
         self.worker = Worker()
         self.threadpool.start(self.worker)
-        self.animation()
+        self.stopButton.setDisabled(False)
+        self.playButton.setDisabled(True)
+        # self.animation()
 
     def muteMusicToggle(self):
-        print("paused: " + self.pause.paused)
-        if self.pause.paused():
+
+        if self.mute.toggle():
+            self.lastVolume = self.slider.value()
             self.slider.setValue(0)
         else:
-            self.slider.setValue(100)
-        self.pause.toggle()
+            self.slider.setValue(self.lastVolume)
 
     def stopMusic(self):
+        self.stopButton.setDisabled(True)
+        self.playButton.setDisabled(False)
         pygame.mixer.music.fadeout(1000)
         pygame.mixer.music.stop()
 
     def volumeChanged(self):
         value = self.slider.value()/100.0
         pygame.mixer.music.set_volume(value)
+        if value > 0:
+            self.mute.muted = False
 
     def __init__(self, parent=None):
         super().__init__(parent)
-
+        self.mute = Mute()
         self.threadpool = QThreadPool()
+
         print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
         my_path = os.path.abspath(os.path.dirname(__file__))
@@ -99,14 +106,15 @@ class Player(QWidget):
         self.interface(path)
 
     def interface(self,path):
-        self.pause = Pause()
 
-        playButton = QPushButton("Play")
-        muteButton = QPushButton("Mute/Unmute")
-        stopButton = QPushButton("Stop")
-        playButton.pressed.connect(lambda: self.playMidiFile())
-        muteButton.pressed.connect(lambda: self.muteMusicToggle())
-        stopButton.pressed.connect(lambda: self.stopMusic())
+        self.muteButton = QPushButton("Mute/Unmute")
+        self.playButton = QPushButton("Play")
+        self.stopButton = QPushButton("Stop")
+
+        self.playButton.pressed.connect(lambda: self.playMidiFile())
+        self.muteButton.pressed.connect(lambda: self.muteMusicToggle())
+        self.stopButton.pressed.connect(lambda: self.stopMusic())
+        self.stopButton.setDisabled(True)
 
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setFocusPolicy(Qt.StrongFocus)
@@ -121,9 +129,9 @@ class Player(QWidget):
         self.label.setPixmap(pixmap.scaled(3 * pixmap.height(), 3 * pixmap.width()))
 
         vButtonBox = QHBoxLayout()
-        vButtonBox.addWidget(playButton)
-        vButtonBox.addWidget(muteButton)
-        vButtonBox.addWidget(stopButton)
+        vButtonBox.addWidget(self.playButton)
+        vButtonBox.addWidget(self.muteButton)
+        vButtonBox.addWidget(self.stopButton)
 
         vBox = QVBoxLayout()
         vBox.addLayout(vButtonBox)
@@ -133,9 +141,7 @@ class Player(QWidget):
         hBox.addWidget(self.label)
         hBox.addLayout(vBox)
 
-        self.frame = QFrame(self)
-        self.frame.setFrameStyle(QFrame.Panel | QFrame.Raised)
-        self.frame.setGeometry(150, 30, 100, 100)
+
 
         self.setGeometry(130, 130, 800, 800)
         self.setWindowTitle('Animation')
