@@ -1,3 +1,4 @@
+import os
 import sys
 import numpy as np
 import png
@@ -20,7 +21,8 @@ def tickNormToPixel(tick):
 def lenInTicks(lines):
    return int(int(lines[len(lines)-3].split()[0]))
 
-fileName = "files/mtxMerged/data.mtx"
+my_path = os.path.abspath(os.path.dirname(__file__))
+fileName = os.path.join(my_path, "..\\files\\mtxMerged\\data.mtx")
 print("Mtx Files Compressing: ")
 lineCounter = 3
 
@@ -88,13 +90,14 @@ for i in range(2, len(lines) - 1):
     lineCounter += 1
 
 # saving last file, that might be uncompleted
+name = os.path.join(my_path, "..\\files\\images\\img")
 for index in range(math.ceil(width/128)):
     progress = 100 * index / math.ceil(width/128)
     sys.stdout.write("\r" + str(round(progress, 1)) + '%')
     part = img[:,index*128:(index+1)*128,:]
     if part.shape[1]<128:
         break
-    pngFile = open("files/images/img" + str(index) + ".png", "wb")
+    pngFile = open(name + str(index) + ".png", "wb")
     pngWriter = png.Writer(128,128)
     pngWriter.write(pngFile, np.reshape(part, (-1, 128 * 3)))
     pngFile.close()

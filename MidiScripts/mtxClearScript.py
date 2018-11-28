@@ -7,7 +7,8 @@ import sys
 # any distortion to musical content.
 # I'm only extruding only piano tracks, and merging it onto one channel
 
-path = "files/mtx/*.mtx"
+my_path = os.path.abspath(os.path.dirname(__file__))
+path = os.path.join(my_path, "..\\files\\mtx\\*.mtx")
 fileNames = glob.glob(path)
 print("Mtx Files Clearing: " + str(len(fileNames)) + " files")
 fileCounter = 1
@@ -57,11 +58,13 @@ for fn in fileNames:
             else:
                 isPianoTrack -= 1
     # Opening output folder, creating if folder doesn't exist
-    name = os.path.join("files/mtxSimplified", os.path.basename(fn))
+
+    path = os.path.join(my_path, "..\\files\\mtxSimplified")
+    name = os.path.join(path, os.path.basename(fn))
     try:
         to_save = open(name, "w")
     except FileNotFoundError:
-        os.mkdir("files/mtxSimplified")
+        os.mkdir(path)
         to_save = open(name, "w")
     # Changing first line so we will use only one channel for piano
     cut_file = ["MFile 1 1 120\n"]

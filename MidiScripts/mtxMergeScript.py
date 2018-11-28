@@ -4,7 +4,8 @@ import sys
 
 # This script will merge all Quantized files into one, that will be lately cutted into batches
 
-path = "files/mtxQuantized/*.mtx"
+my_path = os.path.abspath(os.path.dirname(__file__))
+path = os.path.join(my_path, "..\\files\\mtxQuantized\\*.mtx")
 fileNames = glob.glob(path)
 print("Mtx Files Merging: " + str(len(fileNames)) + " files")
 fileCounter = 1
@@ -33,11 +34,12 @@ for fn in fileNames:
     fileCounter += 1
 
 cut_file.append("TrkEnd\n")
-name = "files/mtxMerged/data.mtx"
+
+name = os.path.join(my_path, "..\\files\\mtxMerged\\data.mtx")
 try:
     to_save = open(name, "w")
 except FileNotFoundError:
-    os.mkdir("files/mtxMerged")
+    os.mkdir(os.path.join(my_path, "..\\files\\mtxMerged"))
     to_save = open(name, "w")
 to_save.writelines(cut_file)
 
