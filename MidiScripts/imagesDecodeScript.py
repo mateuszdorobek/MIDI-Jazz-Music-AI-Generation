@@ -6,6 +6,7 @@ import numpy as np
 import png
 import subprocess
 import msvcrt
+import sys
 
 
 class Decoder():
@@ -22,7 +23,7 @@ class Decoder():
         self.command = ''
         #test mode
         if len(argv) == 1:
-            argv = ['imagesDecodeScript.py', '--midi', 'F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/images',
+            argv = ['imagesDecodeScript.py', '--midi', 'F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/images/img4.png',
              'F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/midiGenerated']
         try:
             opts, args = getopt.getopt(argv[1:], "hmt", ["midi","mtx"])
@@ -44,12 +45,6 @@ class Decoder():
         if not os.path.isdir(self.destPath):
             print("Destination Path: must be a directory!\n")
             self.exit()
-        print("------------------------------------------")
-        print(self.path)
-        print(self.destPath)
-        print(self.command)
-        print(self.isFolder)
-
         self.decode()
 
     def decode(self):
@@ -108,15 +103,15 @@ class Decoder():
             if self.command == 'midi':
                 self.convertToMidi()
     def convertToMidi(self):
-        command = "echo '\n' | Mtx2Midi"
-        theproc = subprocess.Popen([command, os.path.basename(self.mtxName)], shell=True, cwd=self.destPath)
-        msvcrt.putch(b'\n')
+        theproc = subprocess.Popen(["echo",  '' ,"|" ,"Mtx2Midi", os.path.basename(self.mtxName)], shell=True, cwd=self.destPath)
+        print()
         print(theproc.communicate())
-        msvcrt.putch(b'\n')
-        print("-----------------")
+
 
 if __name__ == '__main__':
     import sys
     # python imagesDecodeScript.py --midi "F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/images/img0.png" "F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/midiGenerated"
     app = Decoder(sys.argv)
     sys.exit()
+
+
