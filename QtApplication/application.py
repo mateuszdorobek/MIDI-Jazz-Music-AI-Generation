@@ -1,4 +1,6 @@
 import os
+import time
+
 import pygame
 import MidiScripts.imagesDecodeScript as Img2Midi
 
@@ -45,24 +47,16 @@ class Worker(QRunnable):
         pygame.mixer.music.play()
 
 class Player(QWidget):
-    def animation(self):
-        qp = QPainter()
-        pen = QPen(Qt.black, 2, Qt.SolidLine)
-        qp.setPen(pen)
-        qp.drawLine(0, 0, 30, 30)
-        self.anim = QPropertyAnimation(self.frame, b"geometry")
-        self.anim.setDuration(1000)
-        self.anim.setStartValue(qp.drawLine(0,0,30,30))
-        self.anim.setEndValue( qp.drawLine(0,0,40,40))
-        self.anim.start()
-
     def playMidiFile(self):
         self.worker = Worker()
         self.worker.setMidiPath(self.midiFilePath)
         self.threadpool.start(self.worker)
         self.stopButton.setDisabled(False)
         self.playButton.setDisabled(True)
-        # self.animation()
+        self.isMusicPlaying = True
+        self.cursorPos = 0
+        self.startTime = int(round(time.time() * 1000))
+        # self.pixmapTemp = self.label.pixmap().copy()
 
     def muteMusicToggle(self):
 
@@ -76,6 +70,10 @@ class Player(QWidget):
         self.playButton.setDisabled(False)
         pygame.mixer.music.fadeout(1000)
         pygame.mixer.music.stop()
+        self.isMusicPlaying = False
+        self.cursorPos = 0
+        self.startTime = int(round(time.time() * 1000))
+        # self.label.setPixmap(self.pixmapTemp)
     def volumeChanged(self):
         value = self.slider.value()/100.0
         pygame.mixer.music.set_volume(value)
@@ -101,6 +99,7 @@ class Player(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.isMusicPlaying = False
         self.mute = Mute()
         self.threadpool = QThreadPool()
         # print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
@@ -110,6 +109,8 @@ class Player(QWidget):
         self.interface()
 
     def interface(self):
+
+
 
         self.muteButton = QPushButton("Mute/Unmute")
         self.playButton = QPushButton("Play")
@@ -137,7 +138,9 @@ class Player(QWidget):
         self.slider.valueChanged.connect(lambda: self.volumeChanged())
 
         self.label = QLabel()
-        self.label.setPixmap(QPixmap(128*3,128*3))
+        pxmap = QPixmap(128*3,128*3)
+        pxmap.fill(Qt.black)
+        self.label.setPixmap(pxmap)
 
         vBox = QVBoxLayout()
 
@@ -146,7 +149,6 @@ class Player(QWidget):
         vButtonBox.addWidget(self.muteButton)
         vButtonBox.addWidget(self.stopButton)
         vBox.addLayout(vButtonBox)
-
 
         hBox = QHBoxLayout()
         hBox.addWidget(self.volumeLabel)
@@ -164,9 +166,31 @@ class Player(QWidget):
 
         self.setWindowTitle('MIDI Player')
         self.resize(800,400)
+        self.cursorPos = 0
         self.setLayout(hBox)
-
         self.show()
+
+    def paintEvent(self, e):
+        pixmap = self.label.pixmap()
+        qp = QPainter(pixmap)
+        qp.begin(self)
+        if self.isMusicPlaying:
+           self.drawLines(qp)
+        qp.end()
+
+    def drawLines(self, qp):
+        color = QColor(0, 255, 0)
+        color.setAlpha(2)
+        pen = QPen(color, 1, Qt.SolidLine)
+        qp.setPen(pen)
+        qp.drawLine(self.cursorPos, 0, self.cursorPos, 128*3)
+        currTime = int(round(time.time() * 1000)) - self.startTime
+        self.cursorPos = (currTime/51000)*384
+        print(int(round(time.time() * 1000))-self.startTime)
+        self.update()
+
+
+
     def clearMidiFolder(self):
         folder = "F:\EiTI Infa\Semestr 7\Inżynierka\Diploma\\files\midiGenerated"
         for the_file in os.listdir(folder):
@@ -181,7 +205,6 @@ class Player(QWidget):
         if odp == QMessageBox.Yes:
             self.clearMidiFolder()
         event.accept()
-
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_Escape:
             self.close()
