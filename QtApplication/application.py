@@ -1,5 +1,6 @@
 import os
 import pygame
+import MidiScripts.imagesDecodeScript as Img2Midi
 
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -32,28 +33,19 @@ class Worker(QRunnable):
 
     @pyqtSlot()
     def run(self):
-        print("run")
-        my_path = os.path.abspath(os.path.dirname(__file__))
-        #midiFilePath = self.getMidFromImg()
-        midiFilePath = os.path.join(my_path, "..\\files\\midi\\afine-1.mid")
-        self.play_music(midiFilePath)
+        self.play_music()
+    def setMidiPath(self,midiFilePath):
+        self.midiFilePath = midiFilePath
 
-    def play_music(self, music_file):
+    def play_music(self):
         try:
-            pygame.mixer.music.load(os.path.abspath("..\\files\midi\A Remark You Made.mid"))
+            pygame.mixer.music.load(os.path.abspath(self.midiFilePath))
         except pygame.error:
             return
         pygame.mixer.music.play()
 
 class Player(QWidget):
     def animation(self):
-
-
-        # self.anim = QPropertyAnimation(self.frame, b"geometry")
-        # self.anim.setDuration(10000)
-        # self.anim.setStartValue(QRect(150, 30, 100, 100))
-        # self.anim.setEndValue(QRect(150, 30, 200, 200))
-        # self.anim.start()
         qp = QPainter()
         pen = QPen(Qt.black, 2, Qt.SolidLine)
         qp.setPen(pen)
@@ -64,11 +56,9 @@ class Player(QWidget):
         self.anim.setEndValue( qp.drawLine(0,0,40,40))
         self.anim.start()
 
-    def getMidFromImg(self,path):
-        return " "
-
     def playMidiFile(self):
         self.worker = Worker()
+        self.worker.setMidiPath(self.midiFilePath)
         self.threadpool.start(self.worker)
         self.stopButton.setDisabled(False)
         self.playButton.setDisabled(True)
@@ -81,40 +71,62 @@ class Player(QWidget):
             self.slider.setValue(0)
         else:
             self.slider.setValue(self.lastVolume)
-
     def stopMusic(self):
         self.stopButton.setDisabled(True)
         self.playButton.setDisabled(False)
         pygame.mixer.music.fadeout(1000)
         pygame.mixer.music.stop()
-
     def volumeChanged(self):
         value = self.slider.value()/100.0
         pygame.mixer.music.set_volume(value)
         if value > 0:
             self.mute.muted = False
+    def openFileDialog(self):
+        my_path = os.path.abspath(os.path.dirname(__file__))
+        imgFilePath = os.path.join(my_path, "..\\files\\images")
+        fileName = QFileDialog.getOpenFileName(self, 'Open File', imgFilePath)
+        if fileName[0]:
+            self.stopMusic()
+            self.textLine.setText(os.path.basename(fileName[0]))
+            pixmap = QPixmap(fileName[0])
+            self.label.setPixmap(pixmap.scaled(3 * pixmap.height(), 3 * pixmap.width()))
+            self.convertImageToMidi(fileName[0])
+            self.midiFilePath = (str(fileName[0])[:-3]+"mid").replace("images","midiGenerated").replace("img","file")
+            self.playButton.setDisabled(False)
+
+    def convertImageToMidi(self, fileName):
+        destinationDir = "F:\\EiTI Infa\\Semestr 7\\Inżynierka\\Diploma\\files\\midiGenerated"
+        argvec = ['imageDecodeScript.py','--midi', fileName, destinationDir]
+        Img2Midi.Decoder(argvec)
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.mute = Mute()
         self.threadpool = QThreadPool()
-
-        print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
+        # print("Multithreading with maximum %d threads" % self.threadpool.maxThreadCount())
 
         my_path = os.path.abspath(os.path.dirname(__file__))
         path = os.path.join(my_path, "..\\files\\images\\img0.png")
-        self.interface(path)
+        self.interface()
 
-    def interface(self,path):
+    def interface(self):
 
         self.muteButton = QPushButton("Mute/Unmute")
         self.playButton = QPushButton("Play")
         self.stopButton = QPushButton("Stop")
+        self.fileButton = QPushButton("Choose File")
+        self.textLine = QLineEdit(self)
+
+        self.volumeLabel = QLabel("       Volume:     ")
+        self.volumeLabel.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.volumeLabel.setAlignment(Qt.AlignCenter)
 
         self.playButton.pressed.connect(lambda: self.playMidiFile())
         self.muteButton.pressed.connect(lambda: self.muteMusicToggle())
         self.stopButton.pressed.connect(lambda: self.stopMusic())
         self.stopButton.setDisabled(True)
+        self.playButton.setDisabled(True)
+        self.fileButton.pressed.connect(lambda: self.openFileDialog())
 
         self.slider = QSlider(Qt.Horizontal)
         self.slider.setFocusPolicy(Qt.StrongFocus)
@@ -124,44 +136,51 @@ class Player(QWidget):
         self.slider.setValue(70)
         self.slider.valueChanged.connect(lambda: self.volumeChanged())
 
-        pixmap = QPixmap(path)
         self.label = QLabel()
-        self.label.setPixmap(pixmap.scaled(3 * pixmap.height(), 3 * pixmap.width()))
+        self.label.setPixmap(QPixmap(128*3,128*3))
+
+        vBox = QVBoxLayout()
 
         vButtonBox = QHBoxLayout()
         vButtonBox.addWidget(self.playButton)
         vButtonBox.addWidget(self.muteButton)
         vButtonBox.addWidget(self.stopButton)
-
-        vBox = QVBoxLayout()
         vBox.addLayout(vButtonBox)
-        vBox.addWidget(self.slider)
+
+
+        hBox = QHBoxLayout()
+        hBox.addWidget(self.volumeLabel)
+        hBox.addWidget(self.slider)
+        vBox.addLayout(hBox)
+
+        vButtonBox = QHBoxLayout()
+        vButtonBox.addWidget(self.textLine)
+        vButtonBox.addWidget(self.fileButton)
+        vBox.addLayout(vButtonBox)
 
         hBox = QHBoxLayout()
         hBox.addWidget(self.label)
         hBox.addLayout(vBox)
 
-
-
-        self.setGeometry(130, 130, 800, 800)
-        self.setWindowTitle('Animation')
-        self.show()
-
-
+        self.setWindowTitle('MIDI Player')
         self.resize(800,400)
         self.setLayout(hBox)
 
         self.show()
-    def koniec(self):
-        self.close()
-
+    def clearMidiFolder(self):
+        folder = "F:\EiTI Infa\Semestr 7\Inżynierka\Diploma\\files\midiGenerated"
+        for the_file in os.listdir(folder):
+            file_path = os.path.join(folder, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+            except Exception as e:
+                print(e)
     def closeEvent(self, event):
+        odp = QMessageBox.question( self,'Komunikat',"Czy chcesz usunąć wygenerowane pliki midi?",QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if odp == QMessageBox.Yes:
+            self.clearMidiFolder()
         event.accept()
-        # odp = QMessageBox.question( self,'Komunikat',"Czy na pewno koniec?",QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        # if odp == QMessageBox.Yes:
-        #     event.accept()
-        # else:
-        #     event.ignore()
 
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_Escape:
