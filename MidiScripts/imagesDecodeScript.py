@@ -4,6 +4,9 @@ import re
 import getopt
 import numpy as np
 import png
+import subprocess
+import msvcrt
+
 
 class Decoder():
     def exit(self):
@@ -17,6 +20,10 @@ class Decoder():
         self.path = ''
         self.destPath = ''
         self.command = ''
+        #test mode
+        if len(argv) == 1:
+            argv = ['imagesDecodeScript.py', '--midi', 'F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/images',
+             'F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/midiGenerated']
         try:
             opts, args = getopt.getopt(argv[1:], "hmt", ["midi","mtx"])
         except getopt.GetoptError:
@@ -33,23 +40,29 @@ class Decoder():
             self.exit()
         self.path = args[0]
         self.destPath = args[1]
-        self.isFolder = os.path.isdir(path)
+        self.isFolder = os.path.isdir(self.path)
         if not os.path.isdir(self.destPath):
             print("Destination Path: must be a directory!\n")
             self.exit()
+        print("------------------------------------------")
+        print(self.path)
+        print(self.destPath)
+        print(self.command)
+        print(self.isFolder)
+
+        self.decode()
 
     def decode(self):
         # This script will decompress images 128x128 into mtx files, that will be lately transformed into midi files
         my_path = os.path.abspath(os.path.dirname(__file__))
         if self.isFolder:
-            self.path = os.path.join(self.path, "\\*.png")
+            self.path = self.path + "\\*.png"
             fileNames = glob.glob(self.path)
         else:
             fileNames = [self.path]
         print("Images To Mtx Decompressing: " + str(len(fileNames)) + " files")
-        # TODO: zrobić wczytywanie dla wielu plików
-        fileCounter = 0
 
+        fileCounter = 0
         quantization = 30
         length = 128
         width = 128
@@ -64,10 +77,13 @@ class Decoder():
             progress = 100 * fileCounter / len(fileNames)
             sys.stdout.write("\r" + str(round(progress, 1)) + '%')
 
-            w, h, pixels, meta = png.Reader(filename=fn).asRGB()
+            reader = png.Reader(filename=fn)
+            _, _, _, meta = reader.read_flat()
+            if meta['alpha']:
+                continue
+            w, h, pixels, _ = png.Reader(filename=fn).asRGB()
 
             array = np.asarray(list(pixels))
-            # array = pixels
             activeNotes = array[:, 0]*0
 
             for i in range(len(array[0,:])):
@@ -81,18 +97,26 @@ class Decoder():
                         mtxFile.append(str(i * quantization) + " On ch=1 n=" + str(length-j-1) + " v=0\n")
                         activeNotes[j] = newActiveNotes[j]
             mtxFile.append("TrkEnd\n")
-            path = os.path.join(my_path, "..\\files\\mtxOutput\\mtx")
-            imageNumber = re.search('img(.*).png', os.path.basename(fn)).group(1)
-            name = os.path.join(path+str(imageNumber)+".mtx")
+            self.imageNumber = re.search('img(.*).png', os.path.basename(fn)).group(1)
+            self.mtxName = os.path.join(self.destPath+"/file"+str(self.imageNumber)+".mtx")
             try:
-                to_save = open(name, "w")
+                to_save = open(self.mtxName , "w")
             except FileNotFoundError:
-                os.mkdir(    os.path.join(my_path, "..\\files\\mtxOutput\\"))
-                to_save = open(name, "w")
+                os.mkdir(self.destPath)
+                to_save = open(self.mtxName , "w")
             to_save.writelines(mtxFile)
+            if self.command == 'midi':
+                self.convertToMidi()
+    def convertToMidi(self):
+        command = "echo '\n' | Mtx2Midi"
+        theproc = subprocess.Popen([command, os.path.basename(self.mtxName)], shell=True, cwd=self.destPath)
+        msvcrt.putch(b'\n')
+        print(theproc.communicate())
+        msvcrt.putch(b'\n')
+        print("-----------------")
 
 if __name__ == '__main__':
     import sys
+    # python imagesDecodeScript.py --midi "F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/images/img0.png" "F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/midiGenerated"
     app = Decoder(sys.argv)
     sys.exit()
-    # python imagesDecodeScript.py --midi "F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/filec/images/img0.png" "F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/midiGenerated"
