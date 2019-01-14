@@ -8,13 +8,15 @@ import sys
 # I'm only extruding only piano tracks, and merging it onto one channel
 
 my_path = os.path.abspath(os.path.dirname(__file__))
-path = os.path.join(my_path, "..\\files\\mtx\\*.mtx")
+# path = os.path.join(my_path, "..\\files\\mtx\\*.mtx")
+path = os.path.join(my_path, "..\\mtx\\*.mtx")
 fileNames = glob.glob(path)
 print("Mtx Files Clearing: " + str(len(fileNames)) + " files")
 fileCounter = 1
 
 # Looking for the biggest block MTrk - TrkEnd,
 # which should be music block with piano track ( bass and drums are typically shorter)
+
 for fn in fileNames:
     progress = 100 * fileCounter / len(fileNames)
     sys.stdout.write("\r" + str(round(progress, 1)) + '%')
@@ -59,7 +61,7 @@ for fn in fileNames:
                 isPianoTrack -= 1
     # Opening output folder, creating if folder doesn't exist
 
-    path = os.path.join(my_path, "..\\files\\mtxSimplified")
+    path = os.path.join(my_path, "..\\mtxSimplified")
     name = os.path.join(path, os.path.basename(fn))
     try:
         to_save = open(name, "w")

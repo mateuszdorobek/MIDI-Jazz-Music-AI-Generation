@@ -17,14 +17,15 @@ class Decoder():
                   "Destination Path:\t path to destination Folder, if not existing, will create."
         print(helpMsg)
         sys.exit(2)
-    def __init__(self, argv):
+    def __init__(self, argv, fileNumber):
         self.path = ''
         self.destPath = ''
         self.command = ''
         #test mode
         if len(argv) == 1:
-            argv = ['imagesDecodeScript.py', '--midi', 'F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/images/img4.png',
-             'F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/midiGenerated']
+            inputPath = "C:\\Users\Mateu\Desktop\Pliki z GANa\generatedLastOne3\img" + str(fileNumber) + ".png"
+            outputPath = "F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/maestro/midiGenerated3"
+            argv = ['imagesDecodeScript.py', '--midi', inputPath, outputPath]
         try:
             opts, args = getopt.getopt(argv[1:], "hmt", ["midi","mtx"])
         except getopt.GetoptError:
@@ -59,8 +60,9 @@ class Decoder():
 
         fileCounter = 0
         quantization = 30
-        length = 128
-        width = 128
+        length = 64
+        width = 64
+        down_offset = 36
 
         for fn in fileNames:
 
@@ -86,10 +88,10 @@ class Decoder():
                 for j in range(len(newActiveNotes)):
                     if newActiveNotes[j]>0 and activeNotes[j]==0:
                         # note just pressed
-                        mtxFile.append(str(i*quantization) + " On ch=1 n=" + str(length-j-1) + " v=127\n")
+                        mtxFile.append(str(i*quantization) + " On ch=1 n=" + str(length-j-1+down_offset) + " v=127\n")
                         activeNotes[j] = newActiveNotes[j]
                     elif newActiveNotes[j]==0 and activeNotes[j]>0:
-                        mtxFile.append(str(i * quantization) + " On ch=1 n=" + str(length-j-1) + " v=0\n")
+                        mtxFile.append(str(i * quantization) + " On ch=1 n=" + str(length-j-1+down_offset) + " v=0\n")
                         activeNotes[j] = newActiveNotes[j]
             mtxFile.append("TrkEnd\n")
             self.imageNumber = re.search('img(.*).png', os.path.basename(fn)).group(1)
@@ -111,7 +113,8 @@ class Decoder():
 if __name__ == '__main__':
     import sys
     # python imagesDecodeScript.py --midi "F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/images/img0.png" "F:/EiTI Infa/Semestr 7/Inżynierka/Diploma/files/midiGenerated"
-    app = Decoder(sys.argv)
+    for i in range(63):
+        Decoder(sys.argv, i)
     sys.exit()
 
 
