@@ -6,9 +6,9 @@ import sys
 # for example quantization 30 tics will give us
 # 30/120 = 1/4 of quarter note is sixteenth note
 my_path = os.path.abspath(os.path.dirname(__file__))
-path = os.path.join(my_path, "..\\mtxSimplified\\*.mtx")
+path = os.path.join(my_path, "pliki_mtx_uproszczone\\*.mtx")
 fileNames = glob.glob(path)
-print("Mtx Files Quantizing: " + str(len(fileNames)) + " files")
+print("Kwantyzowanie " + str(len(fileNames)) + " plików tekstowych mtx")
 fileCounter = 1
 
 for fn in fileNames:
@@ -52,7 +52,7 @@ for fn in fileNames:
             #     lineVol = "v=127"
             # save line
             cut_file.append(str(lineTick )+ ' ' + ' '.join(lines[i].split()[1:len(lines[i].split())-1]) + ' ' + lineVol + '\n')
-    path = os.path.join(my_path, "..\\mtxQuantized")
+    path = os.path.join(my_path, "pliki_mtx_skwantyzowane")
     name = os.path.join(path, os.path.basename(fn))
     try:
         to_save = open(name, "w")

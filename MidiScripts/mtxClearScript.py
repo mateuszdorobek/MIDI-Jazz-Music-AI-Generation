@@ -8,10 +8,9 @@ import sys
 # I'm only extruding only piano tracks, and merging it onto one channel
 
 my_path = os.path.abspath(os.path.dirname(__file__))
-# path = os.path.join(my_path, "..\\files\\mtx\\*.mtx")
-path = os.path.join(my_path, "..\\mtx\\*.mtx")
+path = os.path.join(my_path, "baza_plikow_mtx\\*.mtx")
 fileNames = glob.glob(path)
-print("Mtx Files Clearing: " + str(len(fileNames)) + " files")
+print("Czyszczenie " + str(len(fileNames)) + " plików tekstowych mtx")
 fileCounter = 1
 
 # Looking for the biggest block MTrk - TrkEnd,
@@ -61,7 +60,7 @@ for fn in fileNames:
                 isPianoTrack -= 1
     # Opening output folder, creating if folder doesn't exist
 
-    path = os.path.join(my_path, "..\\mtxSimplified")
+    path = os.path.join(my_path, "pliki_mtx_uproszczone")
     name = os.path.join(path, os.path.basename(fn))
     try:
         to_save = open(name, "w")

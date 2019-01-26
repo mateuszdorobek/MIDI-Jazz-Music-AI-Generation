@@ -28,8 +28,8 @@ def limit_notes_range(value):
     return  value - 36;
 
 my_path = os.path.abspath(os.path.dirname(__file__))
-fileName = os.path.join(my_path, "..\\mtxMerged\\data.mtx")
-print("Mtx Files Compressing: ")
+fileName = os.path.join(my_path, "zlaczone_pliki_mtx\\zlaczone_pliki_mtx.mtx")
+print("Tworzenie obrazów ze złączonych plików MTX: ")
 lineCounter = 3
 
 file = open(fileName, "r")
@@ -41,8 +41,6 @@ savedFiles = 0
 length = 64
 width = tickNormToPixel(tickNormalize(lenInTicks(lines)))[0]+100
 linesLen = len(lines) - 1
-print(width)
-print(linesLen)
 
 isSustained = False
 
@@ -98,9 +96,6 @@ for i in range(2, linesLen):
         img[:, tickNormToPixel(tick)[0], tickNormToPixel(tick)[1]] = prevColumn
     for noteIndex in range(length):
         if activeNotes[noteIndex] > 0:
-            # print(activeNotes[noteIndex])
-            # print(255 * activeNotes[noteIndex]/127)
-            # print(int(round(255 * activeNotes[noteIndex]/127)))
             img.itemset(length - noteIndex - 1, tickNormToPixel(currentTick)[0], tickNormToPixel(currentTick)[1], int(round(255 * activeNotes[noteIndex]/127)))
         else:
             img.itemset(length - noteIndex - 1, tickNormToPixel(currentTick)[0], tickNormToPixel(currentTick)[1], 0)
@@ -110,9 +105,11 @@ for i in range(2, linesLen):
     lineCounter += 1
 
 # saving last file, that might be uncompleted
-name = os.path.join(my_path, "..\\images\\img")
-print("zapisujemy obraz")
+name = os.path.join(my_path, "obrazy\\obraz")
+path = os.path.join(my_path, "obrazy")
+print("Zapisywanie obrazów:\n")
 output_files_count = math.ceil(width/length)-1
+os.mkdir(path)
 for index in range(output_files_count):
     progress = 100 * index / output_files_count
     sys.stdout.write("\r" + str(round(progress, 1)) + '%')

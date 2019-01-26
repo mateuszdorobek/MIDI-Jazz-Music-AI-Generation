@@ -5,9 +5,9 @@ import sys
 # This script will merge all Quantized files into one, that will be lately cutted into batches
 
 my_path = os.path.abspath(os.path.dirname(__file__))
-path = os.path.join(my_path, "..\\mtxQuantized\\*.mtx")
+path = os.path.join(my_path, "pliki_mtx_skwantyzowane\\*.mtx")
 fileNames = glob.glob(path)
-print("Mtx Files Merging: " + str(len(fileNames)) + " files")
+print("Łączenie " + str(len(fileNames)) + " plików mtx")
 fileCounter = 1
 cut_file = ["MFile 1 1 120\n","MTrk\n"]
 gap = 300 # 0.3s gap beetwin merged files
@@ -29,17 +29,17 @@ for fn in fileNames:
             tick += lastTick
             cut_file.append(str(tick) + ' ' + ' '.join(lines[i].split()[1:len(lines[i].split())]) + '\n')
         else:
-            print("Error\n Unexpected data: \n\t" + lines[i])
+            print("Error\n Błąd składni MIDI w pliku MTX w lini: \t" + lines[i])
     lastTick = tick + gap
     fileCounter += 1
 
 cut_file.append("TrkEnd\n")
 
-name = os.path.join(my_path, "..\\mtxMerged\\data.mtx")
+name = os.path.join(my_path, "zlaczone_pliki_mtx\\zlaczone_pliki_mtx.mtx")
 try:
     to_save = open(name, "w")
 except FileNotFoundError:
-    os.mkdir(os.path.join(my_path, "..\\mtxMerged"))
+    os.mkdir(os.path.join(my_path, "zlaczone_pliki_mtx"))
     to_save = open(name, "w")
 to_save.writelines(cut_file)
 
