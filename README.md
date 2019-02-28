@@ -59,7 +59,7 @@ And here we have one of the most beautiful things in using GAN networks, learnin
 # Results
 
 As always not the theory, but results are the most interesting thigs in this type of projects. 
-Look at [examples](https://github.com/SaxMan96/Music-Generator/tree/master/QtApp/Executable/music) where you can find music generated using DCGAN. 
+Look at [examples](https://github.com/SaxMan96/Music-Generator/tree/master/music) where you can find music generated using DCGAN. 
 
 # Tech Stack
 
