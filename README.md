@@ -4,10 +4,8 @@ It was part of my diploma thesis defended in January 2019.
 
 Listen **AI Music** at my [SoundCloud](https://soundcloud.com/mateuszdorobek/sets/ai-music)
 
-<img src="https://www.magneticmag.com/.image/t_share/MTU5MDMzNzc3NjQ4MDUxOTky/soundcloud.png"  width="200" title="DCGAN Structure">
-
-<a href="https://www.w3schools.com">
-<img border="0" alt="W3Schools" src="logo_w3s.gif" width="100" height="100">
+<a href="https://soundcloud.com/mateuszdorobek/sets/ai-music">
+<img border="0" alt="W3Schools" src="https://www.magneticmag.com/.image/t_share/MTU5MDMzNzc3NjQ4MDUxOTky/soundcloud.png" width="200">
 </a>
 
 
