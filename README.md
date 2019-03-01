@@ -1,6 +1,9 @@
 # Music Generator
 This project implements Deep Learning solution in generating music with it's image form - piano roll.
 It was part of my diploma thesis defended in January 2019.
+
+Listen **AI Music** at my [SoundCloud](https://soundcloud.com/mateuszdorobek/sets/ai-music)
+
 # Input Data
 Images in piano roll format was created from two midi databases:
 - [Dough McKeznie](https://bushgrafts.com/midi/) - over 300 jazz standards (20h)
