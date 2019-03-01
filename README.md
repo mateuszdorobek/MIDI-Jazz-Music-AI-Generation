@@ -3,6 +3,7 @@ This project implements Deep Learning solution in generating music with it's ima
 It was part of my diploma thesis defended in January 2019.
 
 Listen **AI Music** at my [SoundCloud](https://soundcloud.com/mateuszdorobek/sets/ai-music)
+<iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/719803656&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"></iframe>
 
 # Input Data
 Images in piano roll format was created from two midi databases:
