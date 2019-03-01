@@ -4,7 +4,12 @@ It was part of my diploma thesis defended in January 2019.
 
 Listen **AI Music** at my [SoundCloud](https://soundcloud.com/mateuszdorobek/sets/ai-music)
 
-<iframe width="100%" height="300" scrolling="no" frameborder="no" allow="autoplay" src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/719803656&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true">
+<img src="https://www.magneticmag.com/.image/t_share/MTU5MDMzNzc3NjQ4MDUxOTky/soundcloud.png"  width="200" title="DCGAN Structure">
+
+<a href="https://www.w3schools.com">
+<img border="0" alt="W3Schools" src="logo_w3s.gif" width="100" height="100">
+</a>
+
 
 # Input Data
 Images in piano roll format was created from two midi databases:
