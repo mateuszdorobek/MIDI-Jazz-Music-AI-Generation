@@ -3,6 +3,7 @@ This project implements Deep Learning solution in generating music with it's ima
 It was part of my diploma thesis defended in January 2019.
 
 **LAST UPDATE** - New article ["Use of artificial intelligence for generating musical contents"](https://github.com/SaxMan96/Music-Generator/blob/master/Article.pdf) PL
+
 Listen **AI Music** at my [SoundCloud](https://soundcloud.com/mateuszdorobek/sets/ai-music)
 
 <a href="https://soundcloud.com/mateuszdorobek/sets/ai-music">
