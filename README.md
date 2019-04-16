@@ -13,9 +13,11 @@ Listen **AI Music** at my [SoundCloud](https://soundcloud.com/mateuszdorobek/set
 
 # Input Data
 I've decided to use piano roll forma, becouse it has the less data redundation compared with audio wave form and spectrogram:
+
 <img src="https://raw.githubusercontent.com/SaxMan96/Music-Generator/master/images/music_formats_%20comparition.png" width="500" align="middle" title="Music Formats Comparition">
 
 Images in piano roll format was created from two midi databases:
+
 | Nazwa 	| Opis 	| Typ danych 	| Liczba danych 	|
 |----------------	|------------------------------------------------------	|-------------	|---------------------	|
 | [Dough McKeznie](https://bushgrafts.com/midi/) 	| Pianino jazzowe solo 	| MIDI 	| ~300 utworów, 20h 	|
