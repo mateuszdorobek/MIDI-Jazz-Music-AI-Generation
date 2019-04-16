@@ -14,7 +14,7 @@ Listen **AI Music** at my [SoundCloud](https://soundcloud.com/mateuszdorobek/set
 # Input Data
 I've decided to use piano roll format, becouse it has less data redundation than wave form and spectrogram:
 
-<img src="https://raw.githubusercontent.com/SaxMan96/Music-Generator/master/images/music_formats_%20comparition.png" width="500" align="middle" title="Music Formats Comparition">
+<img src="https://raw.githubusercontent.com/SaxMan96/Music-Generator/master/images/music_formats_%20comparition.png" width="800" align="middle" title="Music Formats Comparition">
 
 Images in piano roll format was created from two midi databases:
 
