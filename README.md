@@ -12,17 +12,16 @@ Listen **AI Music** at my [SoundCloud](https://soundcloud.com/mateuszdorobek/set
 
 
 # Input Data
-I've decided to use piano roll forma, becouse it has the less data redundation compared with audio wave form and spectrogram:
+I've decided to use piano roll format, becouse it has less data redundation than wave form and spectrogram:
 
 <img src="https://raw.githubusercontent.com/SaxMan96/Music-Generator/master/images/music_formats_%20comparition.png" width="500" align="middle" title="Music Formats Comparition">
 
 Images in piano roll format was created from two midi databases:
 
-| Nazwa 	| Opis 	| Typ danych 	| Liczba danych 	|
+| Name 	| Description 	| Data type 	| Data size 	|
 |----------------	|------------------------------------------------------	|-------------	|---------------------	|
-| [Dough McKeznie](https://bushgrafts.com/midi/) 	| Pianino jazzowe solo 	| MIDI 	| ~300 utworów, 20h 	|
-| MidKar 	| Różne gatunki, pełne składy 	| MIDI 	| ~1000 utworów, 60h 	|
-| [MAESTRO](https://magenta.tensorflow.org/datasets/maestro#dataset) 	| Nagrania z pianistycznego konkursu muzyki klasycznej 	| Wave & MIDI 	| ~2500 utworów, 170h 	|
+| [Dough McKeznie](https://bushgrafts.com/midi/) 	| Jazz Piano Solo 	| MIDI 	| ~300 pieces, 20h 	|
+| [MAESTRO](https://magenta.tensorflow.org/datasets/maestro#dataset) 	| Recordings from classical piano competition 	| Wave & MIDI 	| ~2500 pieces, 170h 	|
 
 Using scripts in [MidiScripts](https://github.com/SaxMan96/Music-Generator/tree/master/MidiScripts) I've transformed raw midi files into piano roll image format. 
 #### Preprocessing steps:
